@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StreetForge Apparel — Built Different.</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --black: #0a0a0a;
+    --white: #f5f5f0;
+    --gold: #c9a84c;
+    --gold-light: #e8c97a;
+    --grey: #1a1a1a;
+    --grey-mid: #2e2e2e;
+    --text-muted: #888;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'Barlow', sans-serif;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom Cursor */
+  .cursor {
+    width: 12px; height: 12px;
+    background: var(--gold);
+    border-radius: 50%;
+    position: fixed; top: 0; left: 0;
+    pointer-events: none; z-index: 9999;
+    transition: transform 0.15s ease;
+    mix-blend-mode: difference;
+  }
+  .cursor-ring {
+    width: 36px; height: 36px;
+    border: 1px solid var(--gold);
+    border-radius: 50%;
+    position: fixed; top: 0; left: 0;
+    pointer-events: none; z-index: 9998;
+    transition: transform 0.35s ease, width 0.3s, height 0.3s;
+    transform: translate(-12px, -12px);
+  }
+
+  /* Nav */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1.5rem 4rem;
+    background: rgba(10,10,10,0.9);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(201,168,76,0.15);
+  }
+  .nav-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    letter-spacing: 0.15em;
+    color: var(--white);
+  }
+  .nav-logo span { color: var(--gold); }
+  .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+  .nav-links a {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+  .nav-links a:hover { color: var(--gold); }
+  .nav-cart {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--black);
+    background: var(--gold);
+    padding: 0.5rem 1.4rem;
+    text-decoration: none;
+    transition: background 0.3s;
+  }
+  .nav-cart:hover { background: var(--gold-light); }
+
+  /* Hero */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    padding: 0 4rem;
+  }
+  .hero-bg {
+    position: absolute; inset: 0;
+    background: 
+      radial-gradient(ellipse 60% 60% at 80% 50%, rgba(201,168,76,0.08) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 80% at 10% 80%, rgba(201,168,76,0.04) 0%, transparent 60%);
+  }
+  .hero-lines {
+    position: absolute; inset: 0;
+    background-image: repeating-linear-gradient(
+      90deg, rgba(201,168,76,0.03) 0px, rgba(201,168,76,0.03) 1px, transparent 1px, transparent 80px
+    );
+  }
+  .hero-content { position: relative; z-index: 2; max-width: 900px; }
+  .hero-eyebrow {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.2s forwards;
+  }
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(6rem, 14vw, 14rem);
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.4s forwards;
+  }
+  .hero-title .gold { color: var(--gold); }
+  .hero-sub {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.4rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-top: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.6s forwards;
+  }
+  .hero-cta {
+    display: inline-flex; gap: 1rem;
+    margin-top: 3rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.8s forwards;
+  }
+  .btn-primary {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.9rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--black);
+    background: var(--gold);
+    padding: 1rem 2.5rem;
+    text-decoration: none;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-primary::after {
+    content: ''; position: absolute; inset: 0;
+    background: var(--white);
+    transform: scaleX(0); transform-origin: left;
+    transition: transform 0.3s;
+  }
+  .btn-primary:hover::after { transform: scaleX(1); }
+  .btn-primary span { position: relative; z-index: 1; }
+  .btn-outline {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.9rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--white);
+    border: 1px solid rgba(245,245,240,0.3);
+    padding: 1rem 2.5rem;
+    text-decoration: none;
+    transition: all 0.3s;
+  }
+  .btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+
+  .hero-badge {
+    position: absolute; right: 4rem; bottom: 8rem;
+    width: 140px; height: 140px;
+    border: 1px solid rgba(201,168,76,0.4);
+    border-radius: 50%;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center;
+    animation: spin 20s linear infinite;
+  }
+  .hero-badge-text {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    line-height: 1.6;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Ticker */
+  .ticker {
+    background: var(--gold);
+    padding: 0.9rem 0;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  .ticker-inner {
+    display: inline-block;
+    animation: ticker 20s linear infinite;
+  }
+  .ticker-inner span {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 0.2em;
+    color: var(--black);
+    margin: 0 2rem;
+  }
+  @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+  /* Section */
+  section { padding: 7rem 4rem; }
+  .section-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1rem;
+  }
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3rem, 6vw, 5.5rem);
+    line-height: 1;
+    letter-spacing: 0.02em;
+    margin-bottom: 3rem;
+  }
+
+  /* Products */
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+  }
+  .product-card {
+    background: var(--grey);
+    position: relative;
+    overflow: hidden;
+    group: true;
+  }
+  .product-img {
+    aspect-ratio: 3/4;
+    background: var(--grey-mid);
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .product-design {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(1.8rem, 3vw, 2.8rem);
+    letter-spacing: 0.05em;
+    text-align: center;
+    line-height: 1.1;
+    transition: transform 0.5s ease;
+    padding: 1rem;
+  }
+  .product-card:hover .product-design { transform: scale(1.08); }
+  .product-design .sf-brand {
+    display: block;
+    font-size: 0.7em;
+    color: var(--gold);
+    letter-spacing: 0.3em;
+  }
+  .product-overlay {
+    position: absolute; inset: 0;
+    background: rgba(10,10,10,0.85);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+  .product-card:hover .product-overlay { opacity: 1; }
+  .btn-buy {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--black);
+    background: var(--gold);
+    padding: 0.9rem 2rem;
+    text-decoration: none;
+    border: none;
+    cursor: none;
+    transform: translateY(10px);
+    transition: transform 0.4s 0.05s;
+  }
+  .product-card:hover .btn-buy { transform: translateY(0); }
+  .product-info {
+    padding: 1.5rem;
+    border-top: 1px solid rgba(201,168,76,0.15);
+  }
+  .product-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.3rem;
+  }
+  .product-price {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.3rem;
+    color: var(--gold);
+    letter-spacing: 0.05em;
+  }
+  .product-type {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  /* Product colors */
+  .p1 .product-img { background: #111; }
+  .p2 .product-img { background: #181818; }
+  .p3 .product-img { background: #151515; }
+  .p4 .product-img { background: #121212; }
+  .p5 .product-img { background: #191919; }
+  .p6 .product-img { background: #101010; }
+
+  /* Why Us */
+  .why-section { background: var(--grey); }
+  .why-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 3px;
+    margin-top: 4rem;
+  }
+  .why-card {
+    background: var(--black);
+    padding: 3rem 2.5rem;
+    border-top: 2px solid transparent;
+    transition: border-color 0.4s, transform 0.4s;
+  }
+  .why-card:hover { border-color: var(--gold); transform: translateY(-4px); }
+  .why-number {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 4rem;
+    color: rgba(201,168,76,0.15);
+    line-height: 1;
+    margin-bottom: 1rem;
+  }
+  .why-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.3rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.8rem;
+  }
+  .why-desc {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
+  /* Reviews */
+  .reviews-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    margin-top: 4rem;
+  }
+  .review-card {
+    background: var(--grey);
+    padding: 2.5rem;
+    border-left: 2px solid rgba(201,168,76,0.2);
+    transition: border-color 0.3s;
+  }
+  .review-card:hover { border-color: var(--gold); }
+  .stars { color: var(--gold); font-size: 1rem; margin-bottom: 1rem; letter-spacing: 0.2em; }
+  .review-text {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    line-height: 1.8;
+    margin-bottom: 1.5rem;
+    font-style: italic;
+  }
+  .review-author {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--white);
+  }
+  .review-location { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem; }
+
+  /* Profit Banner */
+  .profit-section {
+    background: var(--gold);
+    padding: 5rem 4rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+  }
+  .profit-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3rem, 5vw, 5rem);
+    color: var(--black);
+    line-height: 1;
+  }
+  .profit-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+  .stat { border-left: 2px solid rgba(0,0,0,0.2); padding-left: 1.5rem; }
+  .stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3rem;
+    color: var(--black);
+    line-height: 1;
+  }
+  .stat-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(0,0,0,0.6);
+  }
+
+  /* Footer */
+  footer {
+    background: var(--black);
+    border-top: 1px solid rgba(201,168,76,0.15);
+    padding: 4rem;
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 3rem;
+  }
+  .footer-brand { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 0.1em; }
+  .footer-brand span { color: var(--gold); }
+  .footer-tagline { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem; }
+  .footer-heading {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1.5rem;
+  }
+  .footer-links { list-style: none; }
+  .footer-links li { margin-bottom: 0.8rem; }
+  .footer-links a {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+  .footer-links a:hover { color: var(--white); }
+  .footer-bottom {
+    border-top: 1px solid rgba(255,255,255,0.05);
+    padding: 1.5rem 4rem;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .footer-bottom p { font-size: 0.8rem; color: var(--text-muted); }
+  .footer-bottom span { color: var(--gold); }
+
+  /* Scroll animations */
+  .reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* Mobile */
+  @media (max-width: 768px) {
+    nav { padding: 1.2rem 1.5rem; }
+    .nav-links { display: none; }
+    section { padding: 5rem 1.5rem; }
+    .hero { padding: 0 1.5rem; }
+    .hero-badge { display: none; }
+    .products-grid, .why-grid, .reviews-grid { grid-template-columns: 1fr; }
+    footer { grid-template-columns: 1fr; padding: 3rem 1.5rem; }
+    .footer-bottom { flex-direction: column; gap: 0.5rem; padding: 1.5rem; text-align: center; }
+    .profit-section { grid-template-columns: 1fr; }
+    .profit-stats { grid-template-columns: 1fr 1fr; }
+    nav { padding: 1rem 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">STREET<span>FORGE</span></div>
+  <ul class="nav-links">
+    <li><a href="#products">Shop</a></li>
+    <li><a href="#why">About</a></li>
+    <li><a href="#reviews">Reviews</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <a href="#products" class="nav-cart">Shop Now</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-lines"></div>
+  <div class="hero-content">
+    <p class="hero-eyebrow">Est. 2026 — South Africa</p>
+    <h1 class="hero-title">STREET<br><span class="gold">FORGE</span></h1>
+    <p class="hero-sub">Built Different. Worn by Those Who Are.</p>
+    <div class="hero-cta">
+      <a href="#products" class="btn-primary"><span>Shop Collection</span></a>
+      <a href="#why" class="btn-outline">Our Story</a>
+    </div>
+  </div>
+  <div class="hero-badge">
+    <div class="hero-badge-text">BUILT<br>·<br>DIFFERENT<br>·<br>EST 2026<br>·</div>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-inner">
+    <span>STREETFORGE APPAREL</span><span>·</span><span>BUILT DIFFERENT</span><span>·</span>
+    <span>WORLDWIDE SHIPPING</span><span>·</span><span>PREMIUM QUALITY</span><span>·</span>
+    <span>EST. 2026</span><span>·</span><span>NO EXCUSES</span><span>·</span>
+    <span>STAY SHARP</span><span>·</span><span>HUSTLE MODE</span><span>·</span>
+    <span>STREETFORGE APPAREL</span><span>·</span><span>BUILT DIFFERENT</span><span>·</span>
+    <span>WORLDWIDE SHIPPING</span><span>·</span><span>PREMIUM QUALITY</span><span>·</span>
+    <span>EST. 2026</span><span>·</span><span>NO EXCUSES</span><span>·</span>
+    <span>STAY SHARP</span><span>·</span><span>HUSTLE MODE</span><span>·</span>
+  </div>
+</div>
+
+<!-- PRODUCTS -->
+<section id="products">
+  <p class="section-label">Best Sellers</p>
+  <h2 class="section-title">THE COLLECTION</h2>
+  <div class="products-grid">
+
+    <div class="product-card p1 reveal">
+      <div class="product-img">
+        <div class="product-design">BUILT<br>DIFFERENT<span class="sf-brand">STREETFORGE</span></div>
+        <div class="product-overlay"><button class="btn-buy">Add to Cart</button></div>
+      </div>
+      <div class="product-info">
+        <p class="product-type">T-Shirt</p>
+        <p class="product-name">Built Different Tee</p>
+        <p class="product-price">R399</p>
+      </div>
+    </div>
+
+    <div class="product-card p2 reveal">
+      <div class="product-img">
+        <div class="product-design" style="font-size:4rem; color: var(--gold);">SF</div>
+        <div class="product-overlay"><button class="btn-buy">Add to Cart</button></div>
+      </div>
+      <div class="product-info">
+        <p class="product-type">T-Shirt</p>
+        <p class="product-name">Minimal Logo Shirt</p>
+        <p class="product-price">R349</p>
+      </div>
+    </div>
+
+    <div class="product-card p3 reveal">
+      <div class="product-img">
+        <div class="product-design">HUSTLE<br>MODE</div>
+        <div class="product-overlay"><button class="btn-buy">Add to Cart</button></div>
+      </div>
+      <div class="product-info">
+        <p class="product-type">Hoodie</p>
+        <p class="product-name">Hustle Hoodie</p>
+        <p class="product-price">R699</p>
+      </div>
+    </div>
+
+    <div class="product-card p4 reveal">
+      <div class="product-img">
+        <div class="product-design">STREET<br>FORGE<span class="sf-brand" style="font-size:0.5em; color: var(--text-muted);">Est. 2026</span></div>
+        <div class="product-overlay"><button class="btn-buy">Add to Cart</button></div>
+      </div>
+      <div class="product-info">
+        <p class="product-type">T-Shirt</p>
+        <p class="product-name">Clean Street Shirt</p>
+        <p class="product-price">R379</p>
+      </div>
+    </div>
+
+    <div class="product-card p5 reveal">
+      <div class="product-img">
+        <div class="product-design">NO<br>EXCUSES</div>
+        <div class="product-overlay"><button class="btn-buy">Add to Cart</button></div>
+      </div>
+      <div class="product-info">
+        <p class="product-type">T-Shirt</p>
+        <p class="product-name">Motivation Shirt</p>
+        <p class="product-price">R399</p>
+      </div>
+    </div>
+
+    <div class="product-card p6 reveal">
+      <div class="product-img">
+        <div class="product-design">Stay<br>Sharp</div>
+        <div class="product-overlay"><button class="btn-buy">Add to Cart</button></div>
+      </div>
+      <div class="product-info">
+        <p class="product-type">Hoodie</p>
+        <p class="product-name">Premium Hoodie</p>
+        <p class="product-price">R749</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- WHY US -->
+<section id="why" class="why-section">
+  <p class="section-label">Why StreetForge</p>
+  <h2 class="section-title">BUILT TO LAST</h2>
+  <div class="why-grid">
+    <div class="why-card reveal">
+      <div class="why-number">01</div>
+      <h3 class="why-title">Premium Quality</h3>
+      <p class="why-desc">Every piece is crafted with premium materials built to move, last, and turn heads. We don't cut corners — because you don't either.</p>
+    </div>
+    <div class="why-card reveal">
+      <div class="why-number">02</div>
+      <h3 class="why-title">Worldwide Shipping</h3>
+      <p class="why-desc">From Johannesburg to the globe. We ship worldwide with full tracking on every order. No borders on ambition.</p>
+    </div>
+    <div class="why-card reveal">
+      <div class="why-number">03</div>
+      <h3 class="why-title">Secure Payments</h3>
+      <p class="why-desc">Shop with confidence. All transactions are encrypted and protected. Your details are always safe with us.</p>
+    </div>
+    <div class="why-card reveal">
+      <div class="why-number">04</div>
+      <h3 class="why-title">Easy Returns</h3>
+      <p class="why-desc">Not happy? We'll fix it. Hassle-free returns within 30 days. We stand behind every single item we sell.</p>
+    </div>
+    <div class="why-card reveal">
+      <div class="why-number">05</div>
+      <h3 class="why-title">Limited Drops</h3>
+      <p class="why-desc">Each design is released in limited quantities. When it's gone, it's gone. Own something rare.</p>
+    </div>
+    <div class="why-card reveal">
+      <div class="why-number">06</div>
+      <h3 class="why-title">Clean Designs</h3>
+      <p class="why-desc">No noise. No clutter. Just clean, bold statements that speak for themselves. Designed to be worn, not just seen.</p>
+    </div>
+  </div>
+</section>
+
+<!-- REVIEWS -->
+<section id="reviews">
+  <p class="section-label">Community</p>
+  <h2 class="section-title">THEY'RE TALKING</h2>
+  <div class="reviews-grid">
+    <div class="review-card reveal">
+      <div class="stars">★★★★★</div>
+      <p class="review-text">"The Hustle Hoodie is insane quality. Wore it to the gym and got three compliments. This brand is the real deal."</p>
+      <p class="review-author">Sipho M.</p>
+      <p class="review-location">Johannesburg, SA</p>
+    </div>
+    <div class="review-card reveal">
+      <div class="stars">★★★★★</div>
+      <p class="review-text">"Built Different tee fits perfectly. Clean design, heavy material. Looks exactly like the photos. Will buy again."</p>
+      <p class="review-author">Liam T.</p>
+      <p class="review-location">Cape Town, SA</p>
+    </div>
+    <div class="review-card reveal">
+      <div class="stars">★★★★★</div>
+      <p class="review-text">"Shipping was faster than expected. The packaging was clean and the quality is premium. StreetForge is going places."</p>
+      <p class="review-author">Aisha K.</p>
+      <p class="review-location">Durban, SA</p>
+    </div>
+  </div>
+</section>
+
+<!-- PROFIT BANNER -->
+<div class="profit-section reveal">
+  <div>
+    <p style="font-family:'Barlow Condensed',sans-serif; font-size:0.8rem; letter-spacing:0.3em; text-transform:uppercase; color:rgba(0,0,0,0.5); margin-bottom:1rem;">The Opportunity</p>
+    <h2 class="profit-title">WEAR IT.<br>SHARE IT.<br>EARN FROM IT.</h2>
+    <p style="margin-top:1.5rem; color:rgba(0,0,0,0.65); max-width:400px; line-height:1.7;">Join the StreetForge community. Tag us in your fits and earn exclusive perks. This isn't just clothing — it's a movement.</p>
+  </div>
+  <div class="profit-stats">
+    <div class="stat">
+      <div class="stat-num">R200+</div>
+      <div class="stat-label">Avg. Profit Per Shirt</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">10+</div>
+      <div class="stat-label">Designs Available</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">100%</div>
+      <div class="stat-label">Secure Checkout</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">🌍</div>
+      <div class="stat-label">Ships Worldwide</div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer id="contact">
+  <div>
+    <div class="footer-brand">STREET<span>FORGE</span></div>
+    <p class="footer-tagline">Built Different. Est. 2026.</p>
+    <p style="margin-top:1.5rem; font-size:0.85rem; color:var(--text-muted); line-height:1.7;">Premium streetwear from South Africa to the world. Clean designs. Bold statements. Zero compromises.</p>
+  </div>
+  <div>
+    <p class="footer-heading">Shop</p>
+    <ul class="footer-links">
+      <li><a href="#products">T-Shirts</a></li>
+      <li><a href="#products">Hoodies</a></li>
+      <li><a href="#products">New Arrivals</a></li>
+      <li><a href="#products">Best Sellers</a></li>
+    </ul>
+  </div>
+  <div>
+    <p class="footer-heading">Support</p>
+    <ul class="footer-links">
+      <li><a href="#">Shipping Info</a></li>
+      <li><a href="#">Returns Policy</a></li>
+      <li><a href="#">Size Guide</a></li>
+      <li><a href="#">FAQ</a></li>
+    </ul>
+  </div>
+  <div>
+    <p class="footer-heading">Follow Us</p>
+    <ul class="footer-links">
+      <li><a href="#">TikTok</a></li>
+      <li><a href="#">Instagram</a></li>
+      <li><a href="#">Facebook</a></li>
+      <li><a href="#">Contact Us</a></li>
+    </ul>
+  </div>
+</footer>
+<div class="footer-bottom">
+  <p>© 2026 <span>StreetForge Apparel</span>. All rights reserved.</p>
+  <p>Built Different.</p>
+</div>
+
+<script>
+  // Custom cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cursor.style.transform = `translate(${mx - 6}px, ${my - 6}px)`;
+  });
+  function animRing() {
+    rx += (mx - rx) * 0.12;
+    ry += (my - ry) * 0.12;
+    ring.style.transform = `translate(${rx - 18}px, ${ry - 18}px)`;
+    requestAnimationFrame(animRing);
+  }
+  animRing();
+
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 80);
+      }
+    });
+  }, { threshold: 0.1 });
+  reveals.forEach(el => observer.observe(el));
+
+  // Add to cart feedback
+  document.querySelectorAll('.btn-buy').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const orig = this.textContent;
+      this.textContent = 'Added ✓';
+      this.style.background = '#2a2a2a';
+      this.style.color = 'var(--gold)';
+      setTimeout(() => {
+        this.textContent = orig;
+        this.style.background = '';
+        this.style.color = '';
+      }, 1500);
+    });
+  });
+</script>
+</body>
+</html>
